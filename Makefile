@@ -1,8 +1,8 @@
-NASM:=nasm	
+NASM:=nasm
 
-all: stage1 
-	cat stage1 > img.bin
-	
-.PHONY: stage1
-stage1:
-	$(NASM) boot.s -o stage1
+all: boot.s
+	cat boot.bin > img.bin
+
+.PHONY: boot.s
+boot.s:
+	$(NASM) boot.s -o boot.bin
