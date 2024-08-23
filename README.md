@@ -1,20 +1,30 @@
-# My x86\_64 OS & bootloader
+# My own OS & bootloader
 
 Project status: WIP
-
-# Building and running on qemu
+Supported architectures as of right now: x86\_64 (aka AMD64)
+Future support planned also for RV32i (RISC-V)
 
 ## Requirements:
 
-- nasm
+### General:
 
-- gnu make
+- GNU core utils,
 
-## Steps
+- GNU Make,
 
+- bash,
+
+- qemu-system-(...),
+
+### x86\_64:
+
+- NASM (Netwide Assembler for x86\_64)
+
+## Building and running with a qemu vm
+
+### x86\_64:
+
+```bash
+make x86_64 -j`nproc`
+./qemu_run_x86_64.sh
 ```
-make -j`nproc`
-./qemu_run.sh
-```
-
-

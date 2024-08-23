@@ -102,10 +102,28 @@ nd_stage_start:
 	push stage2_success
 	call bprint
 
-	; loop forever
-	jmp $-2
+	cli
+	lgdt [gdtr_pmode]
+	mov eax, cr0
+	or al, 1
+	mov cr0, eax
+	jmp 0x08:pmode_start
 
-stage2_success: db 'Yay, past stage 1', 0x0A, 0x0D, 0x00
+stage2_success: db 'Entering 2nd stage', 0x0A, 0x0D, 0x00
+
+%include "gdt.s"
+decl_min_gdt pmode
+
+align 32
+[bits 32]
+pmode_start:
+	; setup segment regs
+	mov ax, 0x10
+	mov es, ax
+	mov ds, ax
+	mov ss, ax
+	sti
+
+	jmp $-2
 
 nd_stage_end:
-	jmp $-2
