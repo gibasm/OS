@@ -92,7 +92,7 @@ bprint:
 
 
 welcome_str: db 'Booting up...', 0x0A, 0x0D, 0x00
-panic_str: db 'Bootloader failure, please reboot your machine', 0x0A, 0x0D, 0x00
+panic_str: db 'Bootloader failure', 0x0A, 0x0D, 0x00
 
 times 510-($-$$) db 0
 db 0x55
@@ -102,7 +102,11 @@ nd_stage_start:
 	push stage2_success
 	call bprint
 
+    mov ax, 0x0003      ; set VGA mode to 80x25 text mode (mode 3)
+    int 0x10            ; BIOS video interrupt
+
 	cli
+
 	lgdt [gdtr_pmode]
 	mov eax, cr0
 	or al, 1
@@ -118,12 +122,47 @@ align 32
 [bits 32]
 pmode_start:
 	; setup segment regs
-	mov ax, 0x10
-	mov es, ax
-	mov ds, ax
-	mov ss, ax
-	sti
+	mov ax, 0x10 ; data seg offset
+    mov ds, ax
+    mov ss, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
 
-	jmp $-2
+    mov ebp, 0x90000
+    mov esp, ebp
+
+    mov esi, pmode_str
+    call bprint32
+
+    hlt
+
+; bprint32([esi] = null terminated str)
+bprint32:
+    push esi
+    push edi
+    push eax
+
+    mov edi, 0x000B8000 ; VGA base
+
+    bprint32_loop:
+        mov al, [esi]
+        cmp al, 0
+        je bprint32_ret
+
+        mov ah, 0x0F
+        stosw
+
+        add edi, 2
+        inc esi
+        jmp bprint32_loop
+
+    bprint32_ret:
+        pop eax
+        pop edi
+        pop esi
+        ret
+
+pmode_str: db 'ENTERED PMODE...', 0x00
 
 nd_stage_end:
