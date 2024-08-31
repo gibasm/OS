@@ -151,7 +151,7 @@ bprint32:
         je bprint32_ret
 
         mov ah, 0x0F
-        stosw
+        mov WORD [edi], ax
 
         add edi, 2
         inc esi
