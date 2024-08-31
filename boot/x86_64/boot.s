@@ -8,87 +8,87 @@
 jmp word 0x00000:start
 
 start:
-	mov ax, 0
-	mov ds, ax
-	mov ss, ax
-	mov es, ax
-	mov fs, ax
+    mov ax, 0
+    mov ds, ax
+    mov ss, ax
+    mov es, ax
+    mov fs, ax
 
-	; source: Ralf Brown's Interrupt List
-	; set video mode
-	mov ah, 0x00
-	; 80x25  9x14  720x350  monochromatic
-	mov al, 0x07
-	int 0x10
+    ; source: Ralf Brown's Interrupt List
+    ; set video mode
+    mov ah, 0x00
+    ; 80x25  9x14  720x350  monochromatic
+    mov al, 0x07
+    int 0x10
 
-	jmp 0:rst_cs
+    jmp 0:rst_cs
 
 rst_cs:
-	mov sp, 0x9000
+    mov sp, 0x9000
 
-	push welcome_str
-	call bprint
+    push welcome_str
+    call bprint
 
-	; set address and appropriate segment to load sectors
-	mov ax, 0
-	mov es, ax
-	mov bx, ND_STAGE_ORG
-	; 0x0000:7e00
+    ; set address and appropriate segment to load sectors
+    mov ax, 0
+    mov es, ax
+    mov bx, ND_STAGE_ORG
+    ; 0x0000:7e00
 
-	; compute number of sectors per 2nd stage
-	mov al, ND_STAGE_SIZE
-	shr al, 9
-	inc al
+    ; compute number of sectors per 2nd stage
+    mov al, ND_STAGE_SIZE
+    shr al, 9
+    inc al
 
-	; load 2nd stage
-	mov ah, 0x02
-	mov ch, 0
-	mov cl, 2
-	mov dh, 0
+    ; load 2nd stage
+    mov ah, 0x02
+    mov ch, 0
+    mov cl, 2
+    mov dh, 0
 
-	int 0x13
+    int 0x13
 
-	jc bpanic
+    jc bpanic
 
-	jmp nd_stage_start
+    jmp nd_stage_start
 
 bpanic:
-	push panic_str
-	call bprint
-	; loop forever
-	jmp $-2
+    push panic_str
+    call bprint
+    ; loop forever
+    jmp $-2
 
 ; bputc(al = ASCII code of the character to be printed)
 bputc:
-	push bx
+    push bx
 
-	mov ah, 0x0e ; teletype
-	mov bh, 0    ; page number
-	mov bl, 0    ; foreground color
-	int 0x10
+    mov ah, 0x0e ; teletype
+    mov bh, 0    ; page number
+    mov bl, 0    ; foreground color
+    int 0x10
 
-	pop bx
-	ret
+    pop bx
+    ret
 
 
 ; bprint([sp] = pointer to the null terminated string to be printed)
 bprint:
-	push bp
-	mov bp, sp
-	add bp, 4
-	mov bx, [bp]
+    push bp
+    mov bp, sp
+    add bp, 4
+    mov bx, [bp]
 
-	bprint_loop:
-		mov al, [bx]
-		test al, al
-		jz bprint_return
-		call bputc
-		add bx, 1
-		jmp bprint_loop
+    bprint_loop:
+        mov al, [bx]
+        test al, al
+        jz bprint_return
+        call bputc
+        add bx, 1
+        jmp bprint_loop
 
-	bprint_return:
-		pop bp
-		ret
+    bprint_return:
+        pop bp
+        ret
 
 
 welcome_str: db 'Booting up...', 0x0A, 0x0D, 0x00
@@ -99,19 +99,19 @@ db 0x55
 db 0xaa
 
 nd_stage_start:
-	push stage2_success
-	call bprint
+    push stage2_success
+    call bprint
 
     mov ax, 0x0003      ; set VGA mode to 80x25 text mode (mode 3)
     int 0x10            ; BIOS video interrupt
+    
+    cli
 
-	cli
-
-	lgdt [gdtr_pmode]
-	mov eax, cr0
-	or al, 1
-	mov cr0, eax
-	jmp 0x08:pmode_start
+    lgdt [gdtr_pmode]
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
+    jmp 0x08:pmode_start
 
 stage2_success: db 'Entering 2nd stage', 0x0A, 0x0D, 0x00
 
@@ -121,8 +121,8 @@ decl_min_gdt pmode
 align 32
 [bits 32]
 pmode_start:
-	; setup segment regs
-	mov ax, 0x10 ; data seg offset
+    ; setup segment regs
+    mov ax, 0x10 ; data seg offset
     mov ds, ax
     mov ss, ax
     mov es, ax
