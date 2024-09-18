@@ -1,8 +1,12 @@
 # My own OS & bootloader
 
-Project status: WIP
+This is a personal project, I'm just playing with bootloader & OS development (:
+
+
 Supported architectures as of right now: x86\_64 (aka AMD64)
-Future support planned also for RV32i (RISC-V)
+
+
+Support planned also for RV32i (RISC-V)
 
 ## Requirements:
 
