@@ -16,14 +16,26 @@
     db ((%1 >> 24) & 0xFF)
 %endmacro
 
-; declare minimal GDT
+; declare minimal GDT for flat memory model
 ; %1 - GDT name (str)
-%macro decl_min_gdt 1
-    align 32
+%macro decl_min_gdt_32 1
+    align 4
     gdt_%1:               ; base   limit    L  D/B DPL  G   P   S     TYPE AVL
-        nullseg: segdesc 0,     0,          0,  0,  0,  0,  0,  0,      0,  0 ;      off=0
+                 segdesc 0,     0,          0,  0,  0,  0,  0,  0,      0,  0 ;      off=0
                  segdesc 0,     0xFFFFF,    0,  1,  0,  1,  1,  1,     10,  0 ; R/X, off=8  <code>
                  segdesc 0,     0xFFFFF,    0,  1,  0,  1,  1,  1,      2,  0 ; R/W, off=16 <data>
+
+    gdtr_%1:
+        dw gdtr_%1 - gdt_%1
+        dd gdt_%1
+%endmacro
+
+%macro decl_min_gdt_64 1
+    align 4
+    gdt_%1:               ; base   limit    L  D/B DPL  G   P   S     TYPE AVL
+                 segdesc 0,     0,          0,  0,  0,  0,  0,  0,      0,  0 ;      off=0
+                 segdesc 0,     0xFFFFF,    1,  1,  0,  1,  1,  1,     10,  0 ; R/X, off=8  <code>
+                 segdesc 0,     0xFFFFF,    1,  1,  0,  1,  1,  1,      2,  0 ; R/W, off=16 <data>
 
     gdtr_%1:
         dw gdtr_%1 - gdt_%1
